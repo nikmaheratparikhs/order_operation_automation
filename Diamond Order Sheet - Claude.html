@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Diamond Purchase Order</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --accent:#6c63ff;
+      --muted:#6b7280;
+      --card:#ffffff;
+      --soft:#f7f8ff;
+    }
+
+    body{
+      background: linear-gradient(135deg,#f3f6ff,#eef2f7);
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      padding:18px;
+    }
+
+    .app-shell{
+      display:flex;
+      gap:18px;
+      align-items:flex-start;
+    }
+
+    /* Left 40% / right 60% panels */
+    .left-col { width:40%; flex-shrink:0; }
+    .right-col { width:60%; min-width:280px; }
+
+    @media (max-width:900px){
+      .app-shell { flex-direction:column; }
+      .left-col, .right-col { width:100% !important; }
+    }
+
+    /* Panel cards */
+    .card-panel {
+      background:var(--card);
+      border-radius:12px;
+      padding:20px;
+      box-shadow:0 8px 28px rgba(35,38,78,0.06);
+      border: 1px solid rgba(99,102,241,0.06);
+    }
+
+    .left-scroll, .right-scroll {
+      max-height: calc(100vh - 120px);
+      overflow:auto;
+      padding-right:6px;
+    }
+
+    /* Form */
+    .left-panel h4 { color:var(--accent); font-weight:700; margin-bottom:20px; }
+    .form-label.fw-semibold { font-weight:600; font-size:0.95rem; color:#374151; margin-bottom:6px; }
+    .form-control, .form-select { 
+      border-radius:8px; 
+      border: 1px solid #d1d5db;
+      padding:10px 12px;
+      font-size:0.95rem;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+    }
+
+    /* Section dividers */
+    .form-section {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #e5e7eb;
+    }
+    .section-title {
+      font-weight: 700;
+      color: #111827;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Preview header */
+    .po-header {
+      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
+      padding:16px; border-radius:8px; background:linear-gradient(90deg,#fff,#fbfdff);
+      border:1px solid rgba(99,102,241,0.1);
+      margin-bottom: 20px;
+    }
+
+    .company-block { font-size:0.92rem; color:#243042; line-height:1.4; }
+    .company-block strong { display: block; font-size: 1.1rem; margin-bottom: 4px; }
+    .company-block small { color:var(--muted); display:block; margin-top:8px; font-size:0.82rem; }
+
+    .logo-box img { max-height:72px; object-fit:cover; border-radius:6px; border:1px solid #eee; }
+
+    .po-title { text-align:right; }
+    .po-title h3 { margin:0; color:#222; font-weight:700; letter-spacing:0.6px; font-size: 1.5rem; }
+    .po-meta { color:var(--muted); margin-top:6px; font-size:0.9rem; font-weight: 500; }
+
+    /* Shape card & table - BLACK HEADER */
+    .shape-card { 
+      border-radius:10px; 
+      border:1px solid #e5e7eb; 
+      background:#ffffff; 
+      margin-bottom:20px; 
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .shape-title { 
+      text-align:center; 
+      font-weight:700; 
+      color: #ffffff;
+      background: #000000;
+      padding: 12px;
+      margin: 0;
+      font-size:1.1rem; 
+      border-bottom: 3px solid #000000;
+      letter-spacing: 0.5px;
+    }
+    
+    .shape-table { 
+      border-collapse:separate !important; 
+      border-spacing:0; 
+      width:100%; 
+      margin: 0;
+    }
+    
+    .shape-table thead th {
+      background: #f3f4f6;
+      border-bottom:2px solid #d1d5db;
+      font-weight:700; 
+      color:#111827;
+      text-align:center; 
+      font-size:0.9rem; 
+      padding:12px 8px;
+    }
+    
+    .shape-table tbody td { 
+      text-align:center; 
+      padding:10px 8px; 
+      vertical-align:middle; 
+      font-size:0.92rem; 
+      color:#374151;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .shape-table tbody tr:hover td { 
+      background: #f9fafb; 
+    }
+
+    /* Action buttons */
+    .action-col .delete-row { padding:5px 10px; font-size:0.85rem; }
+    .delete-shape { padding:6px 12px; font-size:0.85rem; margin: 12px; }
+
+    /* Main action button */
+    .btn-primary {
+      background: linear-gradient(135deg, #6c63ff, #5a52d5);
+      border: none;
+      padding: 12px 20px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #5a52d5, #4a42c5);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(108,99,255,0.3);
+    }
+
+    /* Export buttons */
+    .top-actions { display:flex; gap:8px; justify-content:flex-end; margin-bottom:16px; flex-wrap: wrap; }
+
+    /* Print styles */
+    @media print {
+      .no-print, .action-col, .delete-row, .delete-shape, .top-actions { display:none !important; }
+      body { background: white; padding: 0; }
+      body * { visibility:hidden; }
+      .po-printable, .po-printable * { visibility:visible; }
+      .po-printable { position: absolute; left:0; top:0; width:100%; padding:20px; margin:0; }
+      .shape-title { 
+        background: #000000 !important; 
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .shape-card { page-break-inside: avoid; }
+    }
+
+    /* Mobile tweaks */
+    @media (max-width:600px){
+      .left-panel, .card-panel { padding:14px; }
+      .shape-table thead th, .shape-table tbody td { font-size:0.85rem; padding:8px 4px; }
+      .po-header { flex-direction: column; }
+      .po-title { text-align: left; margin-top: 12px; }
+    }
+
+    /* Utility spacing */
+    .mb-16 { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid">
+  <div class="app-shell">
+
+    <!-- LEFT: Form (40%) -->
+    <div class="left-col">
+      <div class="card-panel left-panel">
+        <h4><i class="fa fa-gem me-2"></i>Diamond Purchase Order</h4>
+
+        <div class="left-scroll">
+          
+          <!-- ORDER INFO SECTION - MOVED TO TOP -->
+          <div class="form-section">
+            <div class="section-title">Order Information</div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Order No</label>
+              <input id="orderNoInput" class="form-control" value="" placeholder="Enter Order Number">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">PO Date</label>
+              <input id="poDateInput" type="date" class="form-control" />
+            </div>
+          </div>
+
+          <!-- DIAMOND DETAILS SECTION -->
+          <div class="form-section">
+            <div class="section-title">Diamond Details</div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Shape</label>
+              <select id="shapeSelect" class="form-select">
+                <option>Round</option><option>Pear</option><option>Oval</option>
+                <option>Princess</option><option>Emerald</option><option>Asscher</option>
+                <option>Radiant</option><option>Heart</option><option>Marquise</option>
+                <option>Trillion</option><option>Baguette</option><option>Cushion</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Seive Size</label>
+              <input id="seive" class="form-control" placeholder="+0000 - 000">
+            </div>
+
+            <div class="row gx-2">
+              <div class="col-6 mb-3">
+                <label class="form-label fw-semibold">Pt.</label>
+                <input id="pt" class="form-control" placeholder="0.003">
+              </div>
+              <div class="col-6 mb-3">
+                <label class="form-label fw-semibold">MM Size</label>
+                <input id="mm" class="form-control" placeholder="0.80">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Order in Cts.</label>
+              <input id="orderCts" class="form-control" placeholder="1.00">
+            </div>
+
+            <!-- ADD BUTTON MOVED TO BOTTOM OF FORM -->
+            <div class="d-grid">
+              <button id="addBtn" class="btn btn-primary btn-lg">
+                <i class="fa fa-plus me-2"></i>Add to Purchase Order
+              </button>
+            </div>
+          </div>
+
+          <hr style="margin: 20px 0;">
+
+          <!-- EXPORT SECTION -->
+          <div class="form-section">
+            <div class="section-title">Export & Save Options</div>
+            
+            <div class="d-flex gap-2 flex-wrap mb-3">
+              <button id="exportPdfBtn" class="btn btn-outline-primary btn-sm">
+                <i class="fa fa-file-pdf me-1"></i>PDF
+              </button>
+              <button id="exportTxtBtn" class="btn btn-outline-secondary btn-sm">
+                <i class="fa fa-file-alt me-1"></i>Text
+              </button>
+              <button id="exportJsonBtn" class="btn btn-outline-success btn-sm">
+                <i class="fa fa-save me-1"></i>JSON
+              </button>
+              <label class="btn btn-outline-dark btn-sm mb-0">
+                <i class="fa fa-upload me-1"></i>Load
+                <input id="importJsonInput" type="file" accept="application/json" hidden>
+              </label>
+            </div>
+            
+            <div class="d-flex gap-2">
+              <button id="printBtn" class="btn btn-success btn-sm no-print flex-fill">
+                <i class="fa fa-print me-1"></i>Print
+              </button>
+              <button id="clearAll" class="btn btn-outline-danger btn-sm flex-fill">
+                <i class="fa fa-trash me-1"></i>Clear All
+              </button>
+            </div>
+            
+            <small class="text-muted d-block mt-3">
+              <i class="fa fa-info-circle me-1"></i>
+              Files are saved locally. Use Load to restore saved orders.
+            </small>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Preview (60%) -->
+    <div class="right-col">
+      <div class="card-panel right-panel">
+        <div class="right-scroll">
+          <!-- Top actions -->
+          <div class="top-actions no-print">
+            <button id="exportPdfBtn2" class="btn btn-outline-primary btn-sm">
+              <i class="fa fa-file-pdf me-1"></i>Export PDF
+            </button>
+            <button id="exportTxtBtn2" class="btn btn-outline-secondary btn-sm">
+              <i class="fa fa-file-alt me-1"></i>Export Text
+            </button>
+            <button id="exportJsonBtn2" class="btn btn-outline-success btn-sm">
+              <i class="fa fa-save me-1"></i>Save JSON
+            </button>
+          </div>
+
+          <!-- Printable PO -->
+          <div id="poPreview" class="po-printable">
+            <div class="po-header">
+              <div class="company-block">
+                <strong>The Jewelry Group, LLC</strong>
+                <div>50 Cragwood Road, Suite 225</div>
+                <div>South Plainfield NJ 07080</div>
+                <div style="margin-top:8px; font-weight:600;">Contact: Jitesh Parikh</div>
+                <small>
+                  Cell: 732 770 2000 &nbsp;|&nbsp; Fax: 908 818 0506<br>
+                  jiteshparikh@gmail.com
+                </small>
+              </div>
+
+              <div class="logo-box">
+                <img src="https://picsum.photos/seed/picsum/200/300" alt="Company">
+              </div>
+
+              <div class="po-title">
+                <h3>Purchase Order</h3>
+                <div class="po-meta">Date: <span id="previewDate"></span></div>
+                <div class="po-meta">Order No: <span id="previewOrderNoDisplay"></span></div>
+              </div>
+            </div>
+
+            <!-- Shapes container -->
+            <div id="shapesGrid"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+<script>
+  // --- Data model
+  const shapes = {};
+  const uid = () => 'id' + Math.random().toString(36).slice(2,9);
+
+  // --- DOM refs
+  const shapeSelect = document.getElementById('shapeSelect');
+  const seiveInput = document.getElementById('seive');
+  const ptInput = document.getElementById('pt');
+  const mmInput = document.getElementById('mm');
+  const orderCtsInput = document.getElementById('orderCts');
+  const addBtn = document.getElementById('addBtn');
+  const shapesGrid = document.getElementById('shapesGrid');
+
+  const exportPdfBtn = document.getElementById('exportPdfBtn');
+  const exportJsonBtn = document.getElementById('exportJsonBtn');
+  const exportTxtBtn = document.getElementById('exportTxtBtn');
+  const exportPdfBtn2 = document.getElementById('exportPdfBtn2');
+  const exportJsonBtn2 = document.getElementById('exportJsonBtn2');
+  const exportTxtBtn2 = document.getElementById('exportTxtBtn2');
+  const importJsonInput = document.getElementById('importJsonInput');
+  const clearAllBtn = document.getElementById('clearAll');
+  const printBtn = document.getElementById('printBtn');
+
+  const previewDate = document.getElementById('previewDate');
+  const previewOrderNoDisplay = document.getElementById('previewOrderNoDisplay');
+  const orderNoInput = document.getElementById('orderNoInput');
+  const poDateInput = document.getElementById('poDateInput');
+
+  // Set default date
+  function setDefaultDate(){
+    const today = new Date();
+    const iso = today.toISOString().slice(0,10);
+    poDateInput.value = iso;
+    previewDate.innerText = (new Date(iso)).toLocaleDateString();
+  }
+  setDefaultDate();
+
+  orderNoInput.addEventListener('input', () => {
+    previewOrderNoDisplay.innerText = orderNoInput.value;
+  });
+  
+  poDateInput.addEventListener('change', () => {
+    previewDate.innerText = (new Date(poDateInput.value)).toLocaleDateString();
+  });
+
+  // Add
+  addBtn.addEventListener('click', () => {
+    const shape = shapeSelect.value;
+    const row = {
+      id: uid(),
+      seive: seiveInput.value.trim() || '-',
+      pt: ptInput.value.trim() || '-',
+      mm: mmInput.value.trim() || '-',
+      orderCts: orderCtsInput.value.trim() || '-'
+    };
+    if (!shapes[shape]) shapes[shape] = [];
+    shapes[shape].push(row);
+
+    seiveInput.value = ptInput.value = mmInput.value = orderCtsInput.value = '';
+    renderGrid();
+    
+    // Visual feedback
+    addBtn.innerHTML = '<i class="fa fa-check me-2"></i>Added!';
+    setTimeout(() => {
+      addBtn.innerHTML = '<i class="fa fa-plus me-2"></i>Add to Purchase Order';
+    }, 1000);
+  });
+
+  // Render shapes with Sr No
+  function renderGrid(){
+    shapesGrid.innerHTML = '';
+    const shapeNames = Object.keys(shapes);
+    if (shapeNames.length === 0){
+      shapesGrid.innerHTML = '<div class="text-center text-muted py-5"><i class="fa fa-inbox fa-3x mb-3 d-block"></i><p>No items added yet. Start by filling the form on the left.</p></div>';
+      return;
+    }
+
+    shapeNames.forEach(shapeName => {
+      const rows = shapes[shapeName];
+      const wrapper = document.createElement('div');
+      wrapper.className = 'shape-card';
+
+      let rowsHtml = '';
+      rows.forEach((r, idx) => {
+        rowsHtml += `
+          <tr data-row-id="${r.id}">
+            <td style="width:8%; font-weight:600;">${idx+1}</td>
+            <td data-field="seive" contenteditable="true">${escapeHtml(r.seive)}</td>
+            <td data-field="pt" contenteditable="true">${escapeHtml(r.pt)}</td>
+            <td data-field="mm" contenteditable="true">${escapeHtml(r.mm)}</td>
+            <td data-field="orderCts" contenteditable="true">${escapeHtml(r.orderCts)}</td>
+            <td class="action-col no-print" style="width:10%;">
+              <button class="btn btn-sm btn-outline-danger delete-row">
+                <i class="fa fa-trash"></i>
+              </button>
+            </td>
+          </tr>`;
+      });
+
+      wrapper.innerHTML = `
+        <div class="shape-title">${escapeHtml(shapeName)}</div>
+        <div class="table-responsive">
+          <table class="shape-table table table-borderless mb-0">
+            <thead>
+              <tr>
+                <th style="width:8%;">Sr No.</th>
+                <th>Seive Size</th>
+                <th>Pt.</th>
+                <th>MM Size</th>
+                <th>Order in Cts.</th>
+                <th class="action-col no-print" style="width:10%;">Action</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-end no-print">
+          <button class="btn btn-sm btn-outline-danger delete-shape">
+            <i class="fa fa-trash me-1"></i>Delete Shape
+          </button>
+        </div>
+      `;
+
+      shapesGrid.appendChild(wrapper);
+    });
+
+    attachEvents();
+  }
+
+  // Attach events
+  function attachEvents(){
+    shapesGrid.querySelectorAll('td[contenteditable="true"]').forEach(td => {
+      td.onblur = (e) => {
+        const tr = td.closest('tr');
+        const id = tr.getAttribute('data-row-id');
+        const field = td.getAttribute('data-field');
+        updateRow(id, field, td.innerText.trim());
+      };
+      td.onkeydown = (e) => { 
+        if (e.key === 'Enter') { 
+          e.preventDefault(); 
+          td.blur(); 
+        } 
+      };
+      td.onclick = () => selectText(td);
+    });
+
+    shapesGrid.querySelectorAll('.delete-row').forEach(btn => {
+      btn.onclick = (e) => {
+        const tr = e.target.closest('tr');
+        const id = tr.getAttribute('data-row-id');
+        if (confirm('Delete this row?')) {
+          deleteRow(id);
+        }
+      };
+    });
+
+    shapesGrid.querySelectorAll('.delete-shape').forEach(btn => {
+      btn.onclick = (e) => {
+        const card = e.target.closest('.shape-card');
+        const shapeName = card.querySelector('.shape-title').innerText;
+        if (confirm(`Delete all rows for "${shapeName}"?`)) {
+          delete shapes[shapeName];
+          renderGrid();
+        }
+      };
+    });
+  }
+
+  function selectText(el){
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  function updateRow(id, field, val){
+    for (const s in shapes){
+      const row = shapes[s].find(r => r.id === id);
+      if (row){
+        row[field] = val || '-';
+        return;
+      }
+    }
+  }
+
+  function deleteRow(id){
+    for (const s in shapes){
+      const idx = shapes[s].findIndex(r => r.id === id);
+      if (idx !== -1){
+        shapes[s].splice(idx,1);
+        if (shapes[s].length === 0) delete shapes[s];
+        renderGrid();
+        return;
+      }
+    }
+  }
+
+  function escapeHtml(str){
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  // Clear all
+  clearAllBtn.addEventListener('click', () => {
+    if (!confirm('Clear entire purchase order? This cannot be undone.')) return;
+    for (const k of Object.keys(shapes)) delete shapes[k];
+    renderGrid();
+  });
+
+  // Build PO object
+  function buildPoObject(){
+    return {
+      company: {
+        name: "The Jewelry Group, LLC",
+        address: "50 Cragwood Road, Suite 225, South Plainfield NJ 07080",
+        contact: "Jitesh Parikh",
+        cell: "732 770 2000",
+        fax: "908 818 0506",
+        email: "jiteshparikh@gmail.com"
+      },
+      orderNo: orderNoInput.value,
+      date: poDateInput.value || (new Date()).toISOString().slice(0,10),
+      items: JSON.parse(JSON.stringify(shapes))
+    };
+  }
+
+  function downloadFile(filename, content, mime){
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; 
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // Export JSON
+  exportJsonBtn.addEventListener('click', () => {
+    const po = buildPoObject();
+    const name = `PO_${po.orderNo}_${po.date}.json`.replace(/\s+/g,'_');
+    downloadFile(name, JSON.stringify(po, null, 2), 'application/json');
+  });
+  exportJsonBtn2.addEventListener('click', () => exportJsonBtn.click());
+
+  // Import JSON
+  importJsonInput.addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!data.items) { 
+          alert('Invalid purchase order file'); 
+          return; 
+        }
+        
+        for (const k of Object.keys(shapes)) delete shapes[k];
+        Object.assign(shapes, data.items);
+        
+        if (data.orderNo) orderNoInput.value = data.orderNo;
+        if (data.date) {
+          poDateInput.value = data.date;
+          previewDate.innerText = (new Date(data.date)).toLocaleDateString();
+        }
+        previewOrderNoDisplay.innerText = orderNoInput.value;
+        renderGrid();
+        
+        alert('Purchase order loaded successfully!');
+      } catch(err){
+        alert('Failed to load file: ' + err.message);
+      }
+    };
+    reader.readAsText(f);
+    e.target.value = '';
+  });
+
+  // Export TEXT
+  exportTxtBtn.addEventListener('click', () => {
+    const po = buildPoObject();
+    let txt = `PURCHASE ORDER\n`;
+    txt += `${'='.repeat(50)}\n\n`;
+    txt += `Company: ${po.company.name}\n`;
+    txt += `Order No: ${po.orderNo}\n`;
+    txt += `Date: ${po.date}\n\n`;
+    txt += `ITEMS:\n`;
+    txt += `${'='.repeat(50)}\n`;
+
+    for (const shape in po.items){
+      txt += `\n${shape.toUpperCase()}\n`;
+      txt += `${'-'.repeat(50)}\n`;
+      po.items[shape].forEach((r, idx) => {
+        txt += `${idx+1}. Seive: ${r.seive} | Pt: ${r.pt} | MM: ${r.mm} | Cts: ${r.orderCts}\n`;
+      });
+    }
+
+    const name = `PO_${po.orderNo}_${po.date}.txt`.replace(/\s+/g,'_');
+    downloadFile(name, txt, 'text/plain');
+  });
+  exportTxtBtn2.addEventListener('click', () => exportTxtBtn.click());
+
+  // Export PDF
+  function exportPdf(){
+    const el = document.getElementById('poPreview');
+    const clone = el.cloneNode(true);
+    
+    // Remove all no-print elements
+    clone.querySelectorAll('.no-print, .action-col, .delete-row, .delete-shape').forEach(n => n.remove());
+
+    clone.style.padding = '20px';
+    clone.style.margin = '0';
+    clone.style.background = 'white';
+
+    const opt = {
+      margin: [10, 10, 10, 10],
+      filename: `${orderNoInput.value || 'PO-000'}_${poDateInput.value}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait' 
+      }
+    };
+
+    html2pdf().set(opt).from(clone).save();
+  }
+
+  exportPdfBtn.addEventListener('click', exportPdf);
+  exportPdfBtn2.addEventListener('click', exportPdf);
+
+  // Print
+  printBtn.addEventListener('click', () => window.print());
+
+  // Enter key support
+  orderCtsInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addBtn.click();
+    }
+  });
+
+  // Sync display
+  previewOrderNoDisplay.innerText = orderNoInput.value;
+
+  // Initial render
+  renderGrid();
+
+</script>
+</body>
+</html>
